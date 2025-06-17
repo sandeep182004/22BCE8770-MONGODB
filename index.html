@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Inventory Management Dashboard</title>
+<style>
+/* Your existing styles unchanged... */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+body {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+.sidebar {
+  width: 250px;
+  background-color: #0792e8;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 0 10px 10px 0;
+}
+.sidebar h2 {
+  font-size: 20px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+.sidebar a {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin: 5px 0;
+  text-decoration: none;
+  color: #b0c4de;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+.sidebar a:hover {
+  background-color: #1c2b3c;
+  color: #fff;
+}
+.sidebar a svg {
+  margin-right: 10px;
+}
+.active {
+  background-color: #1c2b3c;
+  color: #fff;
+}
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+header h1 {
+  font-size: 24px;
+}
+.overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+.card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.dark-mode {
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+}
+.dark-mode .sidebar {
+  background-color: #333;
+}
+.dark-mode .sidebar a {
+  color: #ddd;
+}
+.dark-mode .sidebar a:hover,
+.dark-mode .active {
+  background-color: #555;
+}
+.dark-mode .card {
+  background-color: #2c2c2c;
+}
+#theme-toggle {
+  background-color: #2f3e50;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+#theme-toggle:hover {
+  background-color: #1c2b3c;
+}
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+  .overview {
+    grid-template-columns: 1fr;
+  }
+}
+.stock-tracking {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+.stock-tracking .card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.stock-tracking table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.stock-tracking th,
+.stock-tracking td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+.stock-tracking th {
+  background-color: #f4f4f4;
+}
+.form-container {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.form-container input,
+.form-container select,
+.form-container button {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+.form-container button {
+  background-color: #2f3e50;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.form-container button:hover {
+  background-color: #1c2b3c;
+}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <h2>Inventory Dashboard</h2>
+  <a href="#" class="active"><svg width="20" height="20" fill="currentColor"><circle cx="10" cy="10" r="10"/></svg>Dashboard</a>
+  <a href="#" id="add-product-btn"><svg width="20" height="20" fill="currentColor"><rect width="16" height="16" x="2" y="2" rx="2"/></svg>Add Product</a>
+  <a href="#" id="edit-product-btn"><svg width="20" height="20" fill="currentColor"><rect width="16" height="16" x="2" y="2" rx="2"/></svg>Edit Product</a>
+  <a href="#" id="delete-product-btn"><svg width="20" height="20" fill="currentColor"><rect width="16" height="16" x="2" y="2" rx="2"/></svg>Delete Product</a>
+  <a href="#" id="view-products-btn"><svg width="20" height="20" fill="currentColor"><circle cx="10" cy="10" r="10"/></svg>View Products</a>
+  <a href="#" id="stock-tracking-btn"><svg width="20" height="20" fill="currentColor"><circle cx="10" cy="10" r="10"/></svg>Stock Tracking</a>
+</div>
+<div class="main-content">
+  <header>
+    <h1>Welcome, User!</h1>
+    <button id="theme-toggle">Toggle Dark Mode</button>
+  </header>
+  <div class="overview">
+    <div class="card">
+      <h3>Total Products</h3>
+      <p id="total-products">0</p>
+    </div>
+    <div class="card">
+      <h3>Total Stock</h3>
+      <p id="total-stock">0</p>
+    </div>
+    <div class="card">
+      <h3>Out of Stock</h3>
+      <p id="out-of-stock">0</p>
+    </div>
+  </div>
+  <div class="form-container" id="add-product-form" style="display: none;">
+    <h3 id="form-title">Add Product</h3>
+    <input type="text" id="product-name" placeholder="Product Name" />
+    <input type="number" id="product-price" placeholder="Product Price" />
+    <input type="number" id="product-stock" placeholder="Stock Quantity" />
+    <button id="submit-product-btn">Add Product</button>
+  </div>
+  <div class="stock-tracking" id="product-list">
+    <h3>Product List</h3>
+    <table id="products-table">
+      <thead>
+        <tr>
+          <th>Product ID</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!--Products will be listed here-->
+      </tbody>
+    </table>
+  </div>
+  <div class="stock-tracking" id="stock-tracking-section" style="display:none;">
+    <h3>Stock Tracking</h3>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th>Stock Level</th>
+          </tr>
+        </thead>
+        <tbody id="stock-tracking-body">
+          <!--Stock tracking data will appear here-->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+  let products = [];
+  let editingProductId = null;
+
+  const backendUrl = 'http://localhost:5000/api/products'; // CHANGE to your backend URL
+
+  // Dark mode toggle
+  const themeToggle = document.getElementById('theme-toggle');
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+  });
+
+  // Sidebar buttons event handlers
+  document.getElementById('add-product-btn').addEventListener('click', () => {
+    showAddProductForm();
+  });
+  document.getElementById('view-products-btn').addEventListener('click', () => {
+    hideAllSections();
+    document.getElementById('product-list').style.display = 'block';
+    fetchAndRenderProducts();
+  });
+  document.getElementById('stock-tracking-btn').addEventListener('click', () => {
+    hideAllSections();
+    document.getElementById('stock-tracking-section').style.display = 'block';
+    renderStockTracking();
+  });
+
+  // Show add product form
+  function showAddProductForm() {
+    hideAllSections();
+    document.getElementById('add-product-form').style.display = 'flex';
+    document.getElementById('form-title').innerText = 'Add Product';
+    document.getElementById('submit-product-btn').innerText = 'Add Product';
+    clearAddProductForm();
+    editingProductId = null;
+  }
+
+  // Hide all main sections
+  function hideAllSections() {
+    document.getElementById('add-product-form').style.display = 'none';
+    document.getElementById('product-list').style.display = 'none';
+    document.getElementById('stock-tracking-section').style.display = 'none';
+  }
+
+  // Clear form fields
+  function clearAddProductForm() {
+    document.getElementById('product-name').value = '';
+    document.getElementById('product-price').value = '';
+    document.getElementById('product-stock').value = '';
+  }
+
+  // Fetch all products from backend
+  async function fetchAndRenderProducts() {
+    try {
+      const res = await fetch(backendUrl);
+      if (!res.ok) throw new Error('Failed to fetch products');
+      products = await res.json();
+      renderProductsTable();
+      updateOverview();
+    } catch (error) {
+      alert('Error fetching products: ' + error.message);
+    }
+  }
+
+  // Render products table
+  function renderProductsTable() {
+    const tbody = document.querySelector('#products-table tbody');
+    tbody.innerHTML = '';
+    products.forEach((product) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${product._id}</td>
+        <td>${product.name}</td>
+        <td>${product.price}</td>
+        <td>${product.stock}</td>
+        <td>
+          <button class="edit-btn" data-id="${product._id}">Edit</button>
+          <button class="delete-btn" data-id="${product._id}">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Attach edit and delete button listeners
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        startEditProduct(id);
+      });
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        deleteProduct(id);
+      });
+    });
+  }
+
+  // Update overview stats
+  function updateOverview() {
+    const totalProducts = products.length;
+    const totalStock = products.reduce((acc, p) => acc + Number(p.stock), 0);
+    const outOfStock = products.filter(p => p.stock <= 0).length;
+
+    document.getElementById('total-products').innerText = totalProducts;
+    document.getElementById('total-stock').innerText = totalStock;
+    document.getElementById('out-of-stock').innerText = outOfStock;
+  }
+
+  // Render stock tracking table
+  function renderStockTracking() {
+    const tbody = document.getElementById('stock-tracking-body');
+    tbody.innerHTML = '';
+    products.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p._id}</td>
+        <td>${p.name}</td>
+        <td>${p.stock}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Start editing a product
+  function startEditProduct(id) {
+    const product = products.find(p => p._id === id);
+    if (!product) {
+      alert('Product not found');
+      return;
+    }
+    hideAllSections();
+    document.getElementById('add-product-form').style.display = 'flex';
+    document.getElementById('form-title').innerText = 'Edit Product';
+    document.getElementById('submit-product-btn').innerText = 'Save Changes';
+
+    document.getElementById('product-name').value = product.name;
+    document.getElementById('product-price').value = product.price;
+    document.getElementById('product-stock').value = product.stock;
+
+    editingProductId = id;
+  }
+
+  // Submit add/edit product form
+  document.getElementById('submit-product-btn').addEventListener('click', async () => {
+    const name = document.getElementById('product-name').value.trim();
+    const price = parseFloat(document.getElementById('product-price').value);
+    const stock = parseInt(document.getElementById('product-stock').value);
+
+    if (!name || isNaN(price) || isNaN(stock)) {
+      alert('Please fill all fields correctly.');
+      return;
+    }
+
+    if (editingProductId) {
+      // Update product
+      try {
+        const res = await fetch(`${backendUrl}/${editingProductId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, price, stock })
+        });
+        if (!res.ok) throw new Error('Failed to update product');
+        const updated = await res.json();
+        const index = products.findIndex(p => p._id === editingProductId);
+        if (index !== -1) products[index] = updated;
+        alert('Product updated successfully');
+      } catch (error) {
+        alert('Error updating product: ' + error.message);
+        return;
+      }
+    } else {
+      // Add new product
+      try {
+        const res = await fetch(backendUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, price, stock })
+        });
+        if (!res.ok) throw new Error('Failed to add product');
+        const newProduct = await res.json();
+        products.push(newProduct);
+        alert('Product added successfully');
+      } catch (error) {
+        alert('Error adding product: ' + error.message);
+        return;
+      }
+    }
+
+    clearAddProductForm();
+    editingProductId = null;
+    hideAllSections();
+    document.getElementById('product-list').style.display = 'block';
+    renderProductsTable();
+    updateOverview();
+  });
+
+  // Delete product
+  async function deleteProduct(id) {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    try {
+      const res = await fetch(`${backendUrl}/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete product');
+      products = products.filter(p => p._id !== id);
+      alert('Product deleted');
+      renderProductsTable();
+      updateOverview();
+    } catch (error) {
+      alert('Error deleting product: ' + error.message);
+    }
+  }
+
+  // On load: fetch products and show list
+  window.onload = () => {
+    hideAllSections();
+    document.getElementById('product-list').style.display = 'block';
+    fetchAndRenderProducts();
+  };
+</script>
+</body>
+</html>
